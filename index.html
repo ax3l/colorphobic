@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <title>colorphobic</title>
-  <META http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <!--
     colorphobic
     Copyright (C) 2014 Axel Huebl, https://github.com/ax3l
@@ -21,6 +21,19 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -->
 
+  <!-- windows metro stuff for IE, best on 144x144 pixels -->
+  <meta name="msapplication-TileColor" content="#D3D3D3" />
+  <meta name="msapplication-TileImage" content="img/favicon_144.png" />
+
+  <!-- std favicon 96x96 pixels -->
+  <link rel="icon" href="img/favicon_96.png" />
+
+  <!-- iOS: mobile devices & Blackberry ? -->
+  <link rel="apple-touch-icon-precomposed" href="img/favicon_96.png" />
+  <!-- iOS: iPad 152x152 pixels -->
+  <link rel="apple-touch-icon" href="img/favicon_152.png" />
+
+  <!-- third party libraries -->
   <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/imgareaselect/0.9.10/css/imgareaselect-default.css" />
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/imgareaselect/0.9.10/js/jquery.imgareaselect.pack.js"></script>
@@ -38,6 +51,7 @@
      - https://plugins.jquery.com/imgareaselect/
      - http://www.w3schools.com/tags/canvas_drawimage.asp
      - http://www.jqplot.com
+     - https://stackoverflow.com/questions/23849377/html-5-favicon-support
 -->
 </head>
 <body>
@@ -55,7 +69,7 @@
 </a>
 
 <div id="rawSrc" style="position:relative; border: 1px dashed #000; height: 300px; margin: 0; margin-top: 5em;">
-  <img id="raw" src="" height="300" alt="Drop Image Here" oncontextmenu="event.preventDefault();" />
+  <img id="raw" src="img/dropPanda.png" height="300" alt="Drop Image Here" oncontextmenu="event.preventDefault();" />
   <div id="rawLine" style="z-index: 3; text-align: center;"><span style="position: relative; display: inline-block;"></span></div>
 </div>
 

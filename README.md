@@ -13,6 +13,8 @@ Reconstruct the data behind a color scale image from the corresponding values in
 colorbar.
 Pure client-side javascript, no server will eat your data.
 
+[Let me try it!](https://ax3l.github.io/colorphobic/)
+
 ## But why?
 
 If you are a scientist, this tool is *not* for you.
@@ -45,3 +47,10 @@ This tool relies on open source software and open software standards, namely:
   - [jQuery: Base and ImgAreaSelect](https://plugins.jquery.com/imgareaselect/)
   - [jqPlot](http://www.jqplot.com)
   - [HTML5: Canvas](http://www.w3schools.com/tags/canvas_drawimage.asp)
+
+
+![Panda](img/panda_450.png "Panda!")
+
+Image Credit: Adapted version,
+              (CC) BY-NC [The Searcher](https://secure.flickr.com/photos/bar-art/),
+                         [*Of Pandas and Rainbows*](https://flic.kr/p/5e8WXU)
