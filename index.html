@@ -20,7 +20,6 @@
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -->
-</head>
 
   <link rel="stylesheet" type="text/css" href="http://cdnjs.cloudflare.com/ajax/libs/imgareaselect/0.9.10/css/imgareaselect-default.css" />
   <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
@@ -40,6 +39,7 @@
      - http://www.w3schools.com/tags/canvas_drawimage.asp
      - http://www.jqplot.com
 -->
+</head>
 <body>
 
 <output id="list" style="position: fixed; top: 0; left: 0; width: 100%; color: #fff; z-index: 4;
@@ -50,7 +50,7 @@
 </output>
 
 <div id="rawSrc" style="position:relative; border: 1px dashed #000; height: 300px; margin: 0; margin-top: 5em;">
-  <img id="raw" src="" height="300px" alt="Drop Image Here" oncontextmenu="event.preventDefault();" />
+  <img id="raw" src="" height="300" alt="Drop Image Here" oncontextmenu="event.preventDefault();" />
   <div id="rawLine" style="z-index: 3; text-align: center;"><span style="position: relative; display: inline-block;"></span></div>
 </div>
 
@@ -103,7 +103,7 @@
 	  }
 
     }
-    output.push('<li>Use the <em>middle mouse button</em> to select the colorbar!</li>');
+    output.push('<li>Use the <em>right mouse button</em> to select the colorbar!</li>');
     output.push('<li>Use the <em>left mouse button</em> to select the image area!</li>');
     document.getElementById('list').innerHTML = '<ul>' + output.join('') + '</ul>';
   }
