@@ -47,3 +47,8 @@ This tool relies on open source software and open software standards, namely:
   - [jQuery: Base and ImgAreaSelect](https://plugins.jquery.com/imgareaselect/)
   - [jqPlot](http://www.jqplot.com)
   - [HTML5: Canvas](http://www.w3schools.com/tags/canvas_drawimage.asp)
+
+
+![Pandas!](https://farm4.staticflickr.com/3261/2774092202_a29f4698a9_s.jpg)
+
+Image Credit: (CC) BY-NC [The Searcher](https://secure.flickr.com/photos/bar-art/), *Of Pandas and Rainbows*
