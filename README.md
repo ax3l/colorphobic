@@ -49,6 +49,6 @@ This tool relies on open source software and open software standards, namely:
   - [HTML5: Canvas](http://www.w3schools.com/tags/canvas_drawimage.asp)
 
 
-![Pandas!](https://farm4.staticflickr.com/3261/2774092202_a29f4698a9_s.jpg)
+![Pandas!](https://farm4.staticflickr.com/3261/2774092202_a29f4698a9_b.jpg)
 
 Image Credit: (CC) BY-NC [The Searcher](https://secure.flickr.com/photos/bar-art/), *Of Pandas and Rainbows*
