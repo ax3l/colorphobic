@@ -21,17 +21,17 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -->
 
-  <link rel="stylesheet" type="text/css" href="http://cdnjs.cloudflare.com/ajax/libs/imgareaselect/0.9.10/css/imgareaselect-default.css" />
-  <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
-  <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/imgareaselect/0.9.10/js/jquery.imgareaselect.pack.js"></script>
+  <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/imgareaselect/0.9.10/css/imgareaselect-default.css" />
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/imgareaselect/0.9.10/js/jquery.imgareaselect.pack.js"></script>
 
-  <link rel="stylesheet" type="text/css" href="http://cdnjs.cloudflare.com/ajax/libs/jqPlot/1.0.8/jquery.jqplot.min.css" />
-  <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/jqPlot/1.0.8/jquery.jqplot.min.js"></script>
-  <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/jqPlot/1.0.8/plugins/jqplot.highlighter.min.js"></script>
-  <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/jqPlot/1.0.8/plugins/jqplot.cursor.min.js"></script>
-  <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/jqPlot/1.0.8/plugins/jqplot.canvasTextRenderer.min.js"></script>
-  <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/jqPlot/1.0.8/plugins/jqplot.canvasAxisLabelRenderer.min.js"></script>
-  <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/jqPlot/1.0.8/plugins/jqplot.enhancedLegendRenderer.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/jqPlot/1.0.8/jquery.jqplot.min.css" />
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jqPlot/1.0.8/jquery.jqplot.min.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jqPlot/1.0.8/plugins/jqplot.highlighter.min.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jqPlot/1.0.8/plugins/jqplot.cursor.min.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jqPlot/1.0.8/plugins/jqplot.canvasTextRenderer.min.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jqPlot/1.0.8/plugins/jqplot.canvasAxisLabelRenderer.min.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jqPlot/1.0.8/plugins/jqplot.enhancedLegendRenderer.min.js"></script>
 
 <!-- references and kudos:
      - http://www.html5rocks.com/en/tutorials/file/dndfiles/
@@ -93,18 +93,18 @@
       //            f.lastModifiedDate ? f.lastModifiedDate.toLocaleDateString() : 'n/a',
       //            '</li>');
 
-	  var preview = document.querySelector('img');
+	  var rawImg = document.getElementById('raw');
 	  var file    = f;
 	  var reader  = new FileReader();
 
 	  reader.onload = function () {
-	    preview.src = reader.result;
+	    rawImg.src = reader.result;
 	  }
 
 	  if (file) {
 	    reader.readAsDataURL(file);
 	  } else {
-	    preview.src = "";
+	    rawImg.src = "";
 	  }
 
     }
@@ -338,8 +338,8 @@
   var b = [];
   var a = [];
 
-  var stepMin = 1.*$('#cbMin').val();
-  var stepMax = 1.*$('#cbMax').val();
+  var stepMin = 1. * $('#cbMin').val();
+  var stepMax = 1. * $('#cbMax').val();
   var step    = (stepMax - stepMin) / $('colorbar').width;
 
   function updateCBPlot()
@@ -354,8 +354,8 @@
     a = [];
 
     scaleVal = 1./255.; /* rgb -> [0.:1.] */
-    stepMin =  1.*$('#cbMin').val();
-    stepMax =  1.*$('#cbMax').val();
+    stepMin =  1. * $('#cbMin').val();
+    stepMax =  1. * $('#cbMax').val();
     step    = (stepMax - stepMin) / cb.width;
 
 //document.getElementById('list').innerHTML = '<ul><li>' + stepMin + " " + stepMax + " : " + step + '</li></ul>';
