@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>colorphobic</title>
+  <META http-equiv="Content-Type" content="text/html; charset=utf-8">
+<!--
+    colorphobic
+    Copyright (C) 2014 Axel Huebl, https://github.com/ax3l
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+</head>
+
+  <link rel="stylesheet" type="text/css" href="http://cdnjs.cloudflare.com/ajax/libs/imgareaselect/0.9.10/css/imgareaselect-default.css" />
+  <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+  <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/imgareaselect/0.9.10/js/jquery.imgareaselect.pack.js"></script>
+
+  <link rel="stylesheet" type="text/css" href="http://cdnjs.cloudflare.com/ajax/libs/jqPlot/1.0.8/jquery.jqplot.min.css" />
+  <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/jqPlot/1.0.8/jquery.jqplot.min.js"></script>
+  <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/jqPlot/1.0.8/plugins/jqplot.highlighter.min.js"></script>
+  <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/jqPlot/1.0.8/plugins/jqplot.cursor.min.js"></script>
+  <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/jqPlot/1.0.8/plugins/jqplot.canvasTextRenderer.min.js"></script>
+  <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/jqPlot/1.0.8/plugins/jqplot.canvasAxisLabelRenderer.min.js"></script>
+  <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/jqPlot/1.0.8/plugins/jqplot.enhancedLegendRenderer.min.js"></script>
+
+<!-- references and kudos:
+     - http://www.html5rocks.com/en/tutorials/file/dndfiles/
+     - https://plugins.jquery.com/imgareaselect/
+     - http://www.w3schools.com/tags/canvas_drawimage.asp
+     - http://www.jqplot.com
+-->
+<body>
+
+<output id="list" style="position: fixed; top: 0; left: 0; width: 100%; color: #fff; z-index: 4;
+                         background: linear-gradient(to bottom, rgb(0,0,0) 0%,rgb(0,0,0) 88%,rgba(0,0,0,0) 100%);">
+  <ul>
+    <li><em>Drag & Drop</em> an image in the area below!</li>
+  </ul>
+</output>
+
+<div id="rawSrc" style="position:relative; border: 1px dashed #000; height: 300px; margin: 0; margin-top: 5em;">
+  <img id="raw" src="" height="300px" alt="Drop Image Here" oncontextmenu="event.preventDefault();" />
+  <div id="rawLine" style="z-index: 3; text-align: center;"><span style="position: relative; display: inline-block;"></span></div>
+</div>
+
+<br />
+<canvas id="clip" style="border:1px solid #d3d3d3;background:#ffffff;"></canvas><br />
+<canvas id="colorbar" style="border:1px solid #d3d3d3;background:#ffffff;"></canvas><br />
+
+<input id="cbMin" type="number" step="any" placeholder="0" pattern="[0-9]+([,\.][0-9]+)?" formnovalidate onchange="updateCBPlot();" />
+<input id="cbMax" type="number" step="any" placeholder="1" pattern="[0-9]+([,\.][0-9]+)?" formnovalidate onchange="updateCBPlot();" />
+<br />
+
+<div id="colorbarTable" style="display:inline-block; width: 300px; height: 200px;"></div>
+<hr>
+
+<span id="analyseChannels">
+  <input type="checkbox" name="analyseChannel" value="r" checked>red
+  <input type="checkbox" name="analyseChannel" value="g" checked>green
+  <input type="checkbox" name="analyseChannel" value="b" checked>blue
+  <input type="checkbox" name="analyseChannel" value="a">alpha
+</span>
+<button type="button" id="analyse" onclick="analyse();">Analyse Image</button>
+
+<script type="text/javascript">
+  function handleFileSelect(e) {
+    e.stopPropagation();
+    e.preventDefault();
+
+    var files = e.dataTransfer.files; // FileList object.
+
+    // files is a FileList of File objects. List some properties.
+    var output = [];
+    for (var i = 0, f; f = files[i]; i++) {
+      //output.push('<li><strong>', escape(f.name), '</strong> (', f.type || 'n/a', ') ',
+      //            f.size, ' bytes, last modified: ',
+      //            f.lastModifiedDate ? f.lastModifiedDate.toLocaleDateString() : 'n/a',
+      //            '</li>');
+
+	  var preview = document.querySelector('img');
+	  var file    = f;
+	  var reader  = new FileReader();
+
+	  reader.onload = function () {
+	    preview.src = reader.result;
+	  }
+
+	  if (file) {
+	    reader.readAsDataURL(file);
+	  } else {
+	    preview.src = "";
+	  }
+
+    }
+    output.push('<li>Use the <em>middle mouse button</em> to select the colorbar!</li>');
+    output.push('<li>Use the <em>left mouse button</em> to select the image area!</li>');
+    document.getElementById('list').innerHTML = '<ul>' + output.join('') + '</ul>';
+  }
+
+  function handleDragOver(e) {
+    e.stopPropagation();
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'copy'; // Explicitly show this is a copy.
+  }
+
+  // File API support
+  if (window.File && window.FileReader && window.FileList && window.Blob) {
+    // all supported
+  } else
+    alert('This browser misses some File APIs.');
+
+  // Add event listeners for drop target
+  var dropTarget = document.getElementById('rawSrc');
+  dropTarget.addEventListener('dragover', handleDragOver, false);
+  dropTarget.addEventListener('drop', handleFileSelect, false);
+
+  function draw_line(xpos, ypos, width, height) {
+     if( height > width )
+     {
+       xpos -= 10;
+       ypos -= 5;
+       if( ! $('#rawLine').hasClass('vertical') )
+         $('#rawLine').addClass('vertical')
+
+       $('#rawLine').css({'width': '20px', 'height':height,
+                          'border-top': 'medium solid #ff0000',
+                          'border-bottom': 'medium solid #ff0000',
+                          'border-left': 'none',
+                          'border-right': 'none', 
+                          'left':xpos, 'top':ypos, 'position':'absolute'});
+       $('#rawLine span').css({'width': '4px', 'height': '100%',
+                               'border-top': 'none',
+                               'border-bottom': 'none',
+                               'border-left': 'medium solid #ff0000',
+                               'border-right': 'medium solid #ff0000'});
+     }
+     else
+     {
+       xpos -= 5;
+       ypos -= 10;
+       if( $('#rawLine').hasClass('vertical') )
+         $('#rawLine').removeClass('vertical')
+
+       $('#rawLine').css({'width':width, 'height': '20px',
+                          'border-top': 'none',
+                          'border-bottom': 'none',
+                          'border-left': 'medium solid #ff0000',
+                          'border-right': 'medium solid #ff0000', 
+                          'left':xpos, 'top':ypos, 'position':'absolute'});
+       $('#rawLine span').css({'width': '100%', 'height': '4px',
+                               'border-top': 'medium solid #ff0000',
+                               'border-bottom': 'medium solid #ff0000',
+                               'border-left': 'none',
+                               'border-right': 'none'});
+     }
+  }
+
+  function updateCB()
+  {
+    var cb=document.getElementById("colorbar");
+    var cl=document.getElementById("clip");
+    var cbtx=cb.getContext("2d");
+
+    var img = $('img#raw')[0];
+    var nw = img.naturalWidth;
+    var nh = img.naturalHeight;
+    var rw = nw/img.width;
+    var rh = nh/img.height;
+
+    var w = $('div#rawLine').width();
+    var h = $('div#rawLine').height();
+    var linex = $('div#rawLine').position().left;
+    var liney = $('div#rawLine').position().top;
+
+    if( $('#rawLine').hasClass('vertical') )
+      linex += w/2.0;
+    else
+      liney += h/2.0;
+
+//document.getElementById('list').innerHTML = '<ul><li>' + linex + " " + liney + " : " + escape(w) + " " + escape(h) + '</li></ul>';
+
+    if( $('#rawLine').hasClass('vertical') )
+    {
+      cb.width = 1;
+      cb.height = h * rh;
+      cbtx.drawImage( img,
+                      linex * rw, liney * rh,
+                      1, cb.height,
+                      0, 0, cb.width, cb.height );
+    }
+    else
+    {
+      cb.width = w * rw;
+      cb.height = 1;
+      cbtx.drawImage( img,
+                      linex * rw, liney * rh,
+                      cb.width, 1,
+                      0, 0, cb.width, cb.height );
+    }
+
+    var cbData=cbtx.getImageData( 0, 0, cb.width, cb.height );
+
+    // transpose canvas
+    var cbDataT;//cbtx.createImageData(h * rh, 1);
+    if( $('#rawLine').hasClass('vertical') )
+      cbDataT = cbtx.createImageData(h * rh, 1);
+    else
+      cbDataT = cbtx.createImageData(w * rw, 1);
+
+    cb.width = cbDataT.width;
+    cb.height = 1;
+    //var cbDataT=cbtx.createImageData(h * rh, 1);
+    for (x = 0; x < cbData.data.length; x++) {
+        cbDataT.data[x] = cbData.data[x];
+    }
+    cbtx.drawImage( cb, 0, 0, cb.width, cb.height,
+                        0, 0, cb.width, cb.height );
+    cbtx.putImageData( cbDataT, cbDataT.width, 1 );
+
+    cb.height = cl.height * 0.12;
+    //cb.height = cl.height;
+    for (i = 0; i < cb.height; i++) {
+      cbtx.putImageData( cbDataT, 0, i );
+    }
+  }
+
+  function analyse()
+  {
+    updateCBPlot();
+
+    var cl=document.getElementById("clip");
+    var cltx=cl.getContext("2d");
+    var imgData=cltx.getImageData( 0, 0, cl.width, cl.height );
+
+    var cb=document.getElementById("colorbar");
+    var cbtx=cb.getContext("2d");
+    var cbData=cbtx.getImageData( 0, 0, cb.width, cb.height );
+
+    $('#outputTxt').val("");
+    var data = new Array(cl.height);
+    for (var i = 0; i < cl.height; i++)
+      data[i] = new Array(cl.width);
+
+    var px=cltx.createImageData(cl.width, 1);
+    for (var i = 0; i < cb.width; i++) {
+      px.data[i*4+0] = 0.5; px.data[i*4+1] = 0.5;
+      px.data[i*4+2] = 0.5; px.data[i*4+3] = 0.5;
+    }
+
+    var anaR = false;
+    var anaG = false;
+    var anaB = false;
+    var anaA = false;
+    $('#analyseChannels input:checked').each(function() {
+      if ($(this).attr('value') == "r")
+        anaR = true;
+      if ($(this).attr('value') == "g")
+        anaG = true;
+      if ($(this).attr('value') == "b")
+        anaB = true;
+      if ($(this).attr('value') == "a")
+        anaA = true;
+    });
+
+    var outCSV = "";
+    for (var d = 0; d < imgData.data.length; d+=4) {
+      scaleVal = 1./255.; /* rgb -> [0.:1.] */
+      tr = imgData.data[d+0]*scaleVal;
+      tg = imgData.data[d+1]*scaleVal;
+      tb = imgData.data[d+2]*scaleVal;
+      ta = imgData.data[d+3]*scaleVal;
+
+      x = Math.floor(d/4) % cl.width;
+      y = Math.floor(Math.floor(d/4)/cl.width);
+
+      var minCB = 0;
+      var distM = Math.sqrt(4.);
+      for (var i = 0; i < cb.width; i++) {
+        dr = tr - r[i][1];
+        dg = tg - g[i][1];
+        db = tb - b[i][1];
+        da = ta - a[i][1];
+
+        if (!anaR)
+          dr = 0.0;
+        if (!anaB)
+          dg = 0.0;
+        if (!anaG)	
+          db = 0.0;
+        if (!anaA)
+          da = 0.0;
+
+        sp = Math.sqrt(dr*dr + dg*dg + db*db + da*da);
+        if( sp < distM ) {
+          distM = sp;
+          minCB = i;
+        }
+      }
+
+      data[y][x] = stepMax - minCB*step;
+      //data[y] = a*step + stepMin;
+
+      if( x == cl.width - 1 ) {
+        //cltx.putImageData( px, 0, y );
+        outCSV = data[y].toString() + "\n" + outCSV;
+      }
+    }
+
+    blobCSV = new Blob([outCSV], {type: "text/csv"})
+    outTXT = outCSV.replace(/,/g, " ");
+    blobTXT = new Blob([outTXT], {type: "text/plain"})
+    document.getElementById('list').innerHTML = "<ul><li>Download as: <a download='data.csv' href='" +
+                                                //"data:text/csv;base64," + btoa( outCSV ) +
+                                                window.URL.createObjectURL( blobCSV ) +
+                                                "' target='_blank'>[csv]</a> <a download='data.txt' href='" +
+                                                window.URL.createObjectURL( blobTXT ) +
+                                                "' target='_blank'>[txt]</a></li></ul>";
+  }
+
+  var r = [];
+  var g = [];
+  var b = [];
+  var a = [];
+
+  var stepMin = 1.*$('#cbMin').val();
+  var stepMax = 1.*$('#cbMax').val();
+  var step    = (stepMax - stepMin) / $('colorbar').width;
+
+  function updateCBPlot()
+  {
+    var cb=document.getElementById("colorbar");
+    var cbtx=cb.getContext("2d");
+    var imgData=cbtx.getImageData( 0, 0, cb.width, cb.height );
+
+    r = [];
+    g = [];
+    b = [];
+    a = [];
+
+    scaleVal = 1./255.; /* rgb -> [0.:1.] */
+    stepMin =  1.*$('#cbMin').val();
+    stepMax =  1.*$('#cbMax').val();
+    step    = (stepMax - stepMin) / cb.width;
+
+//document.getElementById('list').innerHTML = '<ul><li>' + stepMin + " " + stepMax + " : " + step + '</li></ul>';
+
+    /* read first line */
+    for (i = 0; i < cb.width; i+=1) {
+      r.push([i*step + stepMin, imgData.data[0+i*4]*scaleVal]);
+      g.push([i*step + stepMin, imgData.data[1+i*4]*scaleVal]);
+      b.push([i*step + stepMin, imgData.data[2+i*4]*scaleVal]);
+      a.push([i*step + stepMin, imgData.data[3+i*4]*scaleVal]);
+    }
+
+    var plot1 = $.jqplot('colorbarTable', [r,g,b,a], {
+      seriesDefaults: {showMarker:false},
+      series: [ {label: 'r', color: 'red'}, {label: 'g', color: 'green'}, {label: 'b', color: 'blue'}, {label: 'a', color: 'black'} ],
+      axes:{
+        xaxis:{
+          label:'image value',
+          min: stepMin,
+          max: stepMax
+        },
+        yaxis:{
+          label: 'col',
+          min: -0.05,
+          max: 1.05,
+          ticks: [[-0.1,''], [0., '0'], [0.5, '1/2'], [1., '1'], [1.1,'']]
+        }
+      },
+      legend: {
+        show: true,
+        renderer: $.jqplot.EnhancedLegendRenderer,
+        location: 'se',
+        placement: 'inside',
+        fontSize: '11px',
+        rendererOptions: {
+          numberRows: 1
+        }
+      }
+    });
+
+    $('#colorbarTable').css({'width': cb.width});
+    plot1.replot();
+    //$('#colorbarTable canvas').first()
+    //jqplot-event-canvas
+  }
+
+  var linex = 0;
+  var liney = 0;
+  $(document).ready(function () {
+    $('div#rawLine').mousedown(function(e) {
+      if(e.which === 1)
+      {
+        $(this).addClass('dragging');
+      	var sX = $(this).position().left;
+	var sY = $(this).position().top;
+	var mX = e.pageX;
+	var mY = e.pageY;
+
+	$(this).mousemove(function(e) {
+            if( $(this).hasClass('dragging') )
+            {
+              var nX = sX + (e.pageX - mX);
+              var nY = sY + (e.pageY - mY);
+              if( nX < 0) nX = 0;
+              if( nY < 0) nY = 0;
+              if( nX + $(this).width() > $('img#raw').width() )
+                nX = $('img#raw').width() - $(this).width();
+              if( nY + $(this).height() > $('img#raw').height() )
+                nY = $('img#raw').height() - $(this).height();
+              $(this).css({ 'left': nX,
+                            'top':  nY });
+              updateCB();
+//document.getElementById('list').innerHTML = '<ul><li>' + nX + " " + nY + " : " + $('img#raw').width()  + '</li></ul>';
+            }
+	});
+	$(this).mouseup(function(e) {
+	  if(e.which === 1)
+	    $(this).removeClass('dragging');
+	});
+      }
+    });
+    //$('img#raw').mouseleave(function(e) {
+    //  $('div#rawLine').removeClass('dragging');
+    //});
+
+    $('img#raw').mousedown(function(e) {
+      if(e.which === 3) {
+         var parentOffset = $(this).parent().offset();
+         linex = e.pageX - parentOffset.left;
+         liney = e.pageY - parentOffset.top;
+
+         e.preventDefault();
+      }
+    });
+    $('img#raw').mouseup(function(e) {
+      if(e.which === 3) {
+         e.preventDefault();
+         var parentOffset = $(this).parent().offset();
+         var w = e.pageX - parentOffset.left - linex;
+         var h = e.pageY - parentOffset.top - liney;
+
+	 if( w < 0 )
+         {
+	   w *= -1;
+	   linex -= w;
+         }
+	 if( h < 0 )
+         {
+           h *= -1;
+	   liney -= h;
+         }
+
+         draw_line( linex, liney, w, h );
+	 updateCB();
+      }
+    });
+  });
+
+  // select image area
+  $(document).ready(function () {
+    $('img#raw').imgAreaSelect({
+        handles: true,
+        onSelectEnd: function (img, selection) {
+          if( !selection.width || !selection.height )
+            return;
+                //selection.x1
+		//selection.width
+		//selection.height
+        var c=document.getElementById("clip");
+	var ctx=c.getContext("2d");
+
+	var nw = img.naturalWidth;
+        var nh = img.naturalHeight;
+        var rw = nw/img.width;
+        var rh = nh/img.height;
+
+        c.width = selection.width * rw;
+        c.height = selection.height * rh;
+	ctx.drawImage( img,
+                       selection.x1 * rw, selection.y1 * rh,
+                       selection.width * rw, selection.height * rh,
+                       0, 0, c.width, c.height );
+
+//document.getElementById('list').innerHTML = '<ul><li>' + selection.width/selection.height + ": " + c.width + " " + selection.width * rw + '</li></ul>';
+
+        //var imgData=ctx.getImageData( 0,0,c.width,c.height );
+        //ctx.clearRect(0, 0, c.width, c.height);
+        //ctx.putImageData( imgData, 0, 0 );
+
+        //$('img#raw').src = c.toDataURL("image/png");
+        }
+    });
+  });
+</script>
+
+</body>
+</html>
+
