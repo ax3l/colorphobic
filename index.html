@@ -68,13 +68,13 @@
 </head>
 <body>
 
-<output id="list" style="position: fixed; top: 0; left: 0; width: 100%; color: #fff; z-index: 4; padding: 0.8em;
-                         background: linear-gradient(to bottom, rgb(0,0,0) 0%,rgb(0,0,0) 88%,rgba(0,0,0,0) 100%);">
+<div id="list" style="position: fixed; top: 0; left: 0; width: 100%; color: #fff; z-index: 4; padding: 0.8em;
+                      background: linear-gradient(to bottom, rgb(0,0,0) 0%,rgb(0,0,0) 88%,rgba(0,0,0,0) 100%);">
   <ul id="listElements">
     <li>Image</li>
   </ul>
   <p id="listTxt"><em>Drag & Drop</em> an image in the area below!</p>
-</output>
+</div>
 
 <div id="rawSrc" style="position:relative; border: 1px dashed #000; height: 300px; margin: 0; margin-top: 7em;">
   <img id="raw" src="img/dropPanda.png" height="300" alt="Drop Image Here" oncontextmenu="event.preventDefault();" />
@@ -154,12 +154,11 @@
     var files = e.dataTransfer.files; // FileList object.
 
     // files is a FileList of File objects. List some properties.
-    var output = [];
     for (var i = 0, f; f = files[i]; i++) {
-      //output.push('<li><strong>', escape(f.name), '</strong> (', f.type || 'n/a', ') ',
-      //            f.size, ' bytes, last modified: ',
-      //            f.lastModifiedDate ? f.lastModifiedDate.toLocaleDateString() : 'n/a',
-      //            '</li>');
+      // escape(f.name)
+      // f.type || 'n/a'
+      // f.size, ' bytes
+      // f.lastModifiedDate ? f.lastModifiedDate.toLocaleDateString() : 'n/a'
 
 	  var rawImg = document.getElementById('raw');
 	  var file    = f;
@@ -176,8 +175,6 @@
 	  }
 
     }
-    //output.push('<li>Use the <em>right mouse button</em> to select the colorbar!</li>');
-    //output.push('<li>Use the <em>left mouse button</em> to select the image area!</li>');
     selectStep( "colorbar" );
   }
 
