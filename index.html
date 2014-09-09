@@ -46,6 +46,18 @@
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jqPlot/1.0.8/plugins/jqplot.canvasAxisLabelRenderer.min.js"></script>
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jqPlot/1.0.8/plugins/jqplot.enhancedLegendRenderer.min.js"></script>
 
+  <!-- style sheets -->
+  <style>
+    ul { margin: 0; padding: 0; }
+    li { display:inline-block; font-weight: bold; font-size: 150%; }
+    li + li:before {
+      content: "\00bb";
+      padding: 0 0.5em;
+    }
+
+    a { color: #ffffff; }
+  </style>
+
 <!-- references and kudos:
      - http://www.html5rocks.com/en/tutorials/file/dndfiles/
      - https://plugins.jquery.com/imgareaselect/
@@ -56,21 +68,22 @@
 </head>
 <body>
 
-<output id="list" style="position: fixed; top: 0; left: 0; width: 100%; color: #fff; z-index: 4;
-                         background: linear-gradient(to bottom, rgb(0,0,0) 0%,rgb(0,0,0) 88%,rgba(0,0,0,0) 100%);">
-  <ul>
-    <li><em>Drag & Drop</em> an image in the area below!</li>
+<div id="list" style="position: fixed; top: 0; left: 0; width: 100%; color: #fff; z-index: 4; padding: 0.8em;
+                      background: linear-gradient(to bottom, rgb(0,0,0) 0%,rgb(0,0,0) 88%,rgba(0,0,0,0) 100%);">
+  <ul id="listElements">
+    <li>Image</li>
   </ul>
-</output>
+  <p id="listTxt"><em>Drag & Drop</em> an image in the area below!</p>
+</div>
 
 <a href="https://github.com/ax3l/colorphobic">
   <img style="position: absolute; top: 0; right: 0; border: 0; z-index: 5;"
-       src="forkme.png" alt="Fork me on GitHub" />
+       src="./img/forkme.png" alt="Fork me on GitHub" />
 </a>
 
-<div id="rawSrc" style="position:relative; border: 1px dashed #000; height: 300px; margin: 0; margin-top: 5em;">
+<div id="rawSrc" style="position:relative; border: 1px dashed #000; height: 300px; margin: 0; margin-top: 7em;">
   <img id="raw" src="img/dropPanda.png" height="300" alt="Drop Image Here" oncontextmenu="event.preventDefault();" />
-  <div id="rawLine" style="z-index: 3; text-align: center;"><span style="position: relative; display: inline-block;"></span></div>
+  <div id="rawLine" style="z-index: 3; text-align: center; cursor: move;"><span style="position: relative; display: inline-block;"></span></div>
 </div>
 
 <br />
@@ -93,6 +106,52 @@
 <button type="button" id="analyse" onclick="analyse();">Analyse Image</button>
 
 <script type="text/javascript">
+  function selectStep( step ) {
+    $('#listElements').removeClass();
+
+    switch (step) {
+      case "colorbar":
+        $('#listElements').addClass( 'step-' + step );
+        $('img#raw').imgAreaSelect({remove:true});
+        $('#listElements li').each(function() {
+          if( $(this).html() == "Colorbar" ||
+              $(this).html() == "Image Area" ||
+              $(this).html() == "Range" ||
+              $(this).html() == "Download" )
+            $(this).remove();
+        });
+        $('#listElements').append( "<li onmouseover='$(this).css({cursor: \"pointer\"});' onclick='selectStep(\"colorbar\");'>Colorbar</li>" );
+        $('#listTxt').html("Select a lineout of the colorbar in the image!");
+        break;
+
+      case "imagearea":
+        $('#listElements').addClass( 'step-' + step );
+        $('img#raw').imgAreaSelect({
+          handles: true,
+          onSelectEnd: selectImgArea
+        });
+        $('#listElements').append( '<li>Image Area</li>' );
+        $('#listTxt').html("Select the image's data area!");
+        break;
+
+      case "range":
+        $('#listElements').addClass( 'step-' + step );
+        $('#listElements li').each(function() {
+          if( $(this).html() == "Range" || $(this).html() == "Download" )
+            $(this).remove();
+        });
+        $('#listElements').append( '<li>Range</li>' );
+        $('#listTxt').html("Enter the colorbar's range (min/max)!");
+        break;
+
+      default:
+        $('#listElements').addClass( 'step-download' );
+        $('#listElements').append( '<li>Download</li>' );
+        $('#listTxt').html(step);
+        break;
+    }
+  }
+
   function handleFileSelect(e) {
     e.stopPropagation();
     e.preventDefault();
@@ -100,12 +159,11 @@
     var files = e.dataTransfer.files; // FileList object.
 
     // files is a FileList of File objects. List some properties.
-    var output = [];
     for (var i = 0, f; f = files[i]; i++) {
-      //output.push('<li><strong>', escape(f.name), '</strong> (', f.type || 'n/a', ') ',
-      //            f.size, ' bytes, last modified: ',
-      //            f.lastModifiedDate ? f.lastModifiedDate.toLocaleDateString() : 'n/a',
-      //            '</li>');
+      // escape(f.name)
+      // f.type || 'n/a'
+      // f.size, ' bytes
+      // f.lastModifiedDate ? f.lastModifiedDate.toLocaleDateString() : 'n/a'
 
 	  var rawImg = document.getElementById('raw');
 	  var file    = f;
@@ -122,9 +180,7 @@
 	  }
 
     }
-    output.push('<li>Use the <em>right mouse button</em> to select the colorbar!</li>');
-    output.push('<li>Use the <em>left mouse button</em> to select the image area!</li>');
-    document.getElementById('list').innerHTML = '<ul>' + output.join('') + '</ul>';
+    selectStep( "colorbar" );
   }
 
   function handleDragOver(e) {
@@ -339,12 +395,12 @@
     blobCSV = new Blob([outCSV], {type: "text/csv"})
     outTXT = outCSV.replace(/,/g, " ");
     blobTXT = new Blob([outTXT], {type: "text/plain"})
-    document.getElementById('list').innerHTML = "<ul><li>Download as: <a download='data.csv' href='" +
-                                                //"data:text/csv;base64," + btoa( outCSV ) +
-                                                window.URL.createObjectURL( blobCSV ) +
-                                                "' target='_blank'>[csv]</a> <a download='data.txt' href='" +
-                                                window.URL.createObjectURL( blobTXT ) +
-                                                "' target='_blank'>[txt]</a></li></ul>";
+    selectStep( "Download as: <a download='data.csv' href='" +
+                //"data:text/csv;base64," + btoa( outCSV ) +
+                window.URL.createObjectURL( blobCSV ) +
+                "' target='_blank'>[csv]</a> <a download='data.txt' href='" +
+                window.URL.createObjectURL( blobTXT ) +
+                "' target='_blank'>[txt]</a>" );
   }
 
   var r = [];
@@ -451,12 +507,18 @@
 	});
       }
     });
+
+    $("div.imgareaselect-outer").each(function( index ) {
+
+    });
+// imgareaselect-outer imgareaselect-selection
+
     //$('img#raw').mouseleave(function(e) {
     //  $('div#rawLine').removeClass('dragging');
     //});
 
     $('img#raw').mousedown(function(e) {
-      if(e.which === 3) {
+      if(e.which === 3 || $('#listElements').hasClass( 'step-colorbar' ) ) {
          var parentOffset = $(this).parent().offset();
          linex = e.pageX - parentOffset.left;
          liney = e.pageY - parentOffset.top;
@@ -465,7 +527,7 @@
       }
     });
     $('img#raw').mouseup(function(e) {
-      if(e.which === 3) {
+      if(e.which === 3 || $('#listElements').hasClass( 'step-colorbar' ) ) {
          e.preventDefault();
          var parentOffset = $(this).parent().offset();
          var w = e.pageX - parentOffset.left - linex;
@@ -484,20 +546,16 @@
 
          draw_line( linex, liney, w, h );
 	 updateCB();
+
+         selectStep( "imagearea" );
       }
     });
   });
 
-  // select image area
-  $(document).ready(function () {
-    $('img#raw').imgAreaSelect({
-        handles: true,
-        onSelectEnd: function (img, selection) {
+  function selectImgArea(img, selection) {
           if( !selection.width || !selection.height )
             return;
-                //selection.x1
-		//selection.width
-		//selection.height
+
         var c=document.getElementById("clip");
 	var ctx=c.getContext("2d");
 
@@ -513,16 +571,8 @@
                        selection.width * rw, selection.height * rh,
                        0, 0, c.width, c.height );
 
-//document.getElementById('list').innerHTML = '<ul><li>' + selection.width/selection.height + ": " + c.width + " " + selection.width * rw + '</li></ul>';
-
-        //var imgData=ctx.getImageData( 0,0,c.width,c.height );
-        //ctx.clearRect(0, 0, c.width, c.height);
-        //ctx.putImageData( imgData, 0, 0 );
-
-        //$('img#raw').src = c.toDataURL("image/png");
-        }
-    });
-  });
+    selectStep( "range" );
+  }
 </script>
 
 </body>
