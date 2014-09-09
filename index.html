@@ -46,6 +46,18 @@
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jqPlot/1.0.8/plugins/jqplot.canvasAxisLabelRenderer.min.js"></script>
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jqPlot/1.0.8/plugins/jqplot.enhancedLegendRenderer.min.js"></script>
 
+  <!-- style sheets -->
+  <style>
+    ul { margin: 0; padding: 0; }
+    li { display:inline-block; font-weight: bold; font-size: 150%; }
+    li + li:before {
+      content: "\00bb";
+      padding: 0 0.5em;
+    }
+
+    a { color: #ffffff; }
+  </style>
+
 <!-- references and kudos:
      - http://www.html5rocks.com/en/tutorials/file/dndfiles/
      - https://plugins.jquery.com/imgareaselect/
@@ -59,7 +71,7 @@
 <output id="list" style="position: fixed; top: 0; left: 0; width: 100%; color: #fff; z-index: 4; padding: 0.8em;
                          background: linear-gradient(to bottom, rgb(0,0,0) 0%,rgb(0,0,0) 88%,rgba(0,0,0,0) 100%);">
   <ul id="listElements">
-    <li>Input</li>
+    <li>Image</li>
   </ul>
   <p id="listTxt"><em>Drag & Drop</em> an image in the area below!</p>
 </output>
@@ -96,7 +108,14 @@
       case "colorbar":
         $('#listElements').addClass( 'step-' + step );
         $('img#raw').imgAreaSelect({remove:true});
-        $('#listElements').append( '<li>Colorbar</li>' );
+        $('#listElements li').each(function() {
+          if( $(this).html() == "Colorbar" ||
+              $(this).html() == "Image Area" ||
+              $(this).html() == "Range" ||
+              $(this).html() == "Download" )
+            $(this).remove();
+        });
+        $('#listElements').append( "<li onmouseover='$(this).css({cursor: \"pointer\"});' onclick='selectStep(\"colorbar\");'>Colorbar</li>" );
         $('#listTxt').html("Select a lineout of the colorbar in the image!");
         break;
 
@@ -108,6 +127,16 @@
         });
         $('#listElements').append( '<li>Image Area</li>' );
         $('#listTxt').html("Select the image's data area!");
+        break;
+
+      case "range":
+        $('#listElements').addClass( 'step-' + step );
+        $('#listElements li').each(function() {
+          if( $(this).html() == "Range" || $(this).html() == "Download" )
+            $(this).remove();
+        });
+        $('#listElements').append( '<li>Range</li>' );
+        $('#listTxt').html("Enter the colorbar's range (min/max)!");
         break;
 
       default:
@@ -539,6 +568,8 @@
                        selection.x1 * rw, selection.y1 * rh,
                        selection.width * rw, selection.height * rh,
                        0, 0, c.width, c.height );
+
+    selectStep( "range" );
   }
 </script>
 
