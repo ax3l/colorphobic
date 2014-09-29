@@ -254,9 +254,15 @@
     var liney = $('div#rawLine').position().top;
 
     if( $('#rawLine').hasClass('vertical') )
+    {
       linex += w/2.0;
+      liney += 5;
+    }
     else
+    {
+      linex += 5;
       liney += h/2.0;
+    }
 
 //document.getElementById('list').innerHTML = '<ul><li>' + linex + " " + liney + " : " + escape(w) + " " + escape(h) + '</li></ul>';
 
@@ -364,9 +370,9 @@
 
         if (!anaR)
           dr = 0.0;
-        if (!anaB)
+        if (!anaG)
           dg = 0.0;
-        if (!anaG)	
+        if (!anaB)
           db = 0.0;
         if (!anaA)
           da = 0.0;
