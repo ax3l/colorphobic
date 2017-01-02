@@ -15,6 +15,10 @@ Pure client-side javascript, no server will eat your data.
 
 [Let me try it!](https://ax3l.github.io/colorphobic/)
 
+## Tutorial
+
+![Tutorial](img/colorphobic.gif "Too quick tutorial to follow, just read the page header")
+
 ## But why?
 
 If you are a scientist, this tool is *not* for you.
