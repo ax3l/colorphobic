@@ -4,7 +4,7 @@ colorphobic
 Are you afraid of colored images?
 Do you think the `rainbow color scale` should be banned?
 
-Than colorphobic is for you!
+Then colorphobic is for you!
 
 
 ## tl;dr
@@ -25,12 +25,12 @@ If you are a scientist, this tool is *not* for you.
 Scientists *always* store and publish the scripts and the data that
 produced "shiny image XY" published in year `y = $this - rand()`.
 
-Therefore you will never come to the point were you are stopped trying
-to reconstruct a lineout of a crumpy 100x123 pixel image with a obfuscating
+Therefore you will never reach the point were you are stopped trying
+to reconstruct a lineout of a fuzzy 100x123 pixel image with a obfuscating
 rainbow color scale.
 
 Of course, the only use of this tool is to reconstruct the data from
-images similar to the previously mentioned scenario in case of a hard
+images similar to the previously shown scenario, e.g., in case of a hard
 drive crash (or a zombie outbreak) that destroyed all three offline copies.
 
 P.S.: Please follow an [open access](https://en.wikipedia.org/wiki/Open_access)
